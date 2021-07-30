@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Collectable
+  - Powerup
+  - Enemy
+  - Animal
+  - Projectile
   layers:
   - Default
   - TransparentFX
