@@ -6,15 +6,19 @@ namespace Unit2
     public class MoveForward : MonoBehaviour
     {
         public float speed = 40.0f;
-        float bound = 30f;
-
         void Update()
         {
-            if (transform.position.z > bound || transform.position.z < -bound)
-            {
-                Destroy(gameObject);
-            }
             transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        }
+
+        public void Barked()
+        {
+            speed = 1;
+            Transform myT = transform.Find("Sweat");
+            if (myT != null)
+            {
+                myT.gameObject.SetActive(true);
+            }
         }
     }
 }

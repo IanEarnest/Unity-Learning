@@ -3,29 +3,52 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class AnimalHungerUnit2 : MonoBehaviour
+namespace Unit2
 {
-    public Slider hungerSlider;
-    public int amountToBeFed;
-    private int currentFedAmount = 0;
-    private GameManagerUnit2 gameManager;
-    void Start()
+    public class AnimalHungerUnit2 :MonoBehaviour
     {
-        hungerSlider.maxValue = amountToBeFed;
-        hungerSlider.value = 0;
-        hungerSlider.fillRect.gameObject.SetActive(false);
+        public Slider hungerSlider;
+        public int amountToBeFed;
+        int currentFedAmount = 0;
+        GameManagerUnit2 gameManager;
+        float xMultiplier= 10;
 
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
-    }
-    public void FeedAnimal(int amount)
-    {
-        currentFedAmount += amount;
-        hungerSlider.fillRect.gameObject.SetActive(true);
-        hungerSlider.value = currentFedAmount;
-        if (currentFedAmount >= amountToBeFed)
+        void Start()
         {
-            gameManager.AddScore(amountToBeFed);
-            Destroy(gameObject);
+            hungerSlider.maxValue = amountToBeFed;
+            hungerSlider.value = hungerSlider.maxValue;
+            // Set slider size to amountToBeFed value - larger = larger
+            Vector2 hungerSliderSizeDelta = hungerSlider.gameObject.GetComponent<RectTransform>().sizeDelta;
+            float xSliderSize = hungerSliderSizeDelta.x+(amountToBeFed*xMultiplier);
+            hungerSlider.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(xSliderSize, hungerSliderSizeDelta.y);
+            //hungerSlider.fillRect.gameObject.SetActive(false); //important?
+
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
+        }
+        public void FeedAnimal(int amount)
+        {
+            currentFedAmount += amount;
+            //hungerSlider.fillRect.gameObject.SetActive(true);
+            hungerSlider.value = (amountToBeFed - currentFedAmount);
+            if (currentFedAmount >= amountToBeFed)
+            {
+                if (gameObject.name.Contains(SpawnManagerUnit2.beagleName))
+                {
+                    gameManager.AddAnimal(SpawnManagerUnit2.beagleName);
+                    Destroy(gameObject);
+                }
+                else if (gameObject.name.Contains(SpawnManagerUnit2.bulldogName))
+                {
+                    gameManager.AddAnimal(SpawnManagerUnit2.bulldogName);
+                    Destroy(gameObject);
+                }
+                else if (gameObject.name.Contains(SpawnManagerUnit2.chickenName))
+                {
+                    gameManager.AddAnimal(SpawnManagerUnit2.chickenName);
+                    gameManager.AddScore(amountToBeFed);
+                    Destroy(gameObject);
+                }
+            }
         }
     }
 }

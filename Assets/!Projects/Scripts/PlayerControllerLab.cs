@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class PlayerControllerLab : MonoBehaviour
 {
-    float speed = 10;
-    float bound = 6;
+    float speed = 50;
+    float bound = 10;
     Rigidbody playerRb;
+    string enemyTag = "Enemy";
+    string powerupTag = "Powerup";
+
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +46,23 @@ public class PlayerControllerLab : MonoBehaviour
         if (transform.position.z < -bound)
         {
             transform.position = new Vector3(transform.position.x, transform.position.y, -bound);
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag(enemyTag))
+        {
+            print("Enemy hit!");
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag(powerupTag))
+        {
+            print("POWERUP!");
+            Destroy(other.gameObject);
         }
     }
 }

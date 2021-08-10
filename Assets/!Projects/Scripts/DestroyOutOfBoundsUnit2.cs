@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unit2;
 
-public class DestroyOutOfBoundsX1 : MonoBehaviour
+public class DestroyOutOfBoundsUnit2 : MonoBehaviour
 {
-    private float leftLimit = 20;
-    private float bottomLimit = -5;
-    private float topLimit = 20;
-    private GameManagerUnit2 gameManager;
+    float leftLimit = 60;
+    float bottomLimit = -5;
+    //float topLimit = 70;
+    GameManagerUnit2 gameManager;
 
     void Start()
     {
@@ -17,13 +17,15 @@ public class DestroyOutOfBoundsX1 : MonoBehaviour
     void Update()
     {
         // Destroy dogs if x position less than left limit
+        // -left or right of screen
         if (transform.position.x > leftLimit || transform.position.x < -leftLimit)
         {
-            gameManager.LoseALife();
+            //gameManager.LoseALife();
             Destroy(gameObject);
         }
-        // Destroy balls if y position is less than bottomLimit
-        else if (transform.position.z > topLimit|| transform.position.z < bottomLimit)
+        // Destroy dogs if y position is less than bottomLimit
+        // -under player
+        else if (transform.position.z < bottomLimit) //transform.position.z > topLimit ||
         {
             gameManager.LoseALife();
             Destroy(gameObject);

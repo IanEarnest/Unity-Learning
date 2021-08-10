@@ -9,6 +9,8 @@ TagManager:
   - Enemy
   - Animal
   - Projectile
+  - Food
+  - FoodSpawner
   layers:
   - Default
   - TransparentFX
