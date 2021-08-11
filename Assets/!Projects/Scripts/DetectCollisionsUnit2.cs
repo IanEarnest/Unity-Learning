@@ -5,17 +5,23 @@ using Unit2;
 
 public class DetectCollisionsUnit2 : MonoBehaviour
 {
-    private GameManagerUnit2 gameManager;
-    private PlayerControllerUnit2 playerController;
+    // triggers for Food, Animals, FoodSpawners and Player
+    // uses gameManager and playerController
+    GameManagerUnit2 gameManager;
+    PlayerControllerUnit2 playerController;
 
-    private void Start()
+    void Start()
     {
         gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
         playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerControllerUnit2>();
     }
-    private void OnTriggerEnter(Collider other)
+    // Triggers for:
+    //  Player/ Animal  - loose life
+    //  Food/ Animal    - feed animal   - Beagle+Bone, BullDog+Steak, Chicken+Sandwich
+    //  Player/ FoodSpawner - Set player food to shoot
+    void OnTriggerEnter(Collider other)
     {
-        //print($"Gameobject {gameObject.name} hit: {other.name}");
+        //print($"Gameobject {gameObject.name} hit: {other.name}"); // debug
         if (gameObject.CompareTag("Player") && other.CompareTag("Animal"))
         {
             gameManager.LoseALife();
@@ -24,8 +30,6 @@ public class DetectCollisionsUnit2 : MonoBehaviour
         else if (gameObject.CompareTag("Food") && other.CompareTag("Animal"))//"Projectile"))
         {
             Destroy(gameObject);
-            //gameManager.score++;
-            //print($"Gameobject {gameObject.name} hit: {other.name}");
             if (gameObject.name.Contains("Bone") && other.name.Contains("Beagle"))
             {
                 other.GetComponent<AnimalHungerUnit2>().FeedAnimal(1);
@@ -59,15 +63,12 @@ public class DetectCollisionsUnit2 : MonoBehaviour
                 foodSpawnerCollide = true;
             }
 
-            // If collided with any food, set inactive, change food object for player, print hit
+            // If collided with any food, set inactive, change food object for player
             if (foodSpawnerCollide)
             {
                 other.gameObject.SetActive(false);
                 playerController.food = other.transform.GetChild(0).gameObject;
-                //print($"{other.name} hit");
             }
-            //gameManager.LoseALife();
-            //Destroy(other.gameObject);
         }
     }
 }

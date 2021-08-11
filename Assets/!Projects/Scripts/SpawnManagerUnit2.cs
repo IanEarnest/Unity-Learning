@@ -6,6 +6,10 @@ namespace Unit2
 {
     public class SpawnManagerUnit2 :MonoBehaviour
     {
+        // Spawn dogs, chickens
+        // Food spawners
+        // Difficulty
+
         public GameObject[] animalPrefabs; // Chicken, Dog Beagle, Dog Bulldog
         public GameObject[] foodSpawners; // Sandwich, Bone, Steak
         public static string chickenName = "Chicken";
@@ -23,6 +27,8 @@ namespace Unit2
         float spawnInterval = 3f; //1.5
         float spawnIntervalChicken = 5f;
         int lastActiveFood = 0;
+        bool spawnFood = true;
+        int activeFood = 0;
 
         // Keep spawning dogs from sides
         // and chickens from top
@@ -37,11 +43,23 @@ namespace Unit2
         {
             CheckFoodSpawners();
         }
-        bool CheckFoodSpawnersHaveFood()
+        #region foodSpawning
+        // if any foodSpawner active, don't spawn next food
+        // Spawn rotation for foods in food spawners for player to choose
+        void CheckFoodSpawners()
         {
+            spawnFood = true;
+            CheckFoodSpawnersHaveFood();
+            if (spawnFood)
+            {
+                SpawnFood();
+            }
+        }
+        void  CheckFoodSpawnersHaveFood()
+        {
+            activeFood = 0;
             foreach (GameObject food in foodSpawners)
             {
-                // if any foodSpawner active, don't spawn next food
                 if (food.activeSelf)
                 {
                     spawnFood = false;
@@ -49,37 +67,29 @@ namespace Unit2
                 }
                 activeFood++;
             }
-            return spawnFood;
         }
-        // Spawn rotation for foods in food spawners for player to choose
-        bool spawnFood = true;
-        int activeFood = 0;
-        void CheckFoodSpawners()
+        // spawn food on foodSpawner, set active
+        void SpawnFood()
         {
-            bool spawnFood = true;
-            spawnFood = CheckFoodSpawnersHaveFood();
-            if (spawnFood)
+            GameObject foodGO;
+            GameObject foodChildGO;
+            //first on list
+            if ((lastActiveFood + 2) > foodSpawners.Length) //+1 for next, +1 for array 0 index
             {
-                GameObject foodGO;
-                GameObject foodChildGO;
-                // spawn first on list
-                if ((lastActiveFood+2) > foodSpawners.Length) //+1 for next, +1 for array 0 index
-                {
-                    foodGO = foodSpawners[0];
-                    foodChildGO = foodSpawners[0].transform.GetChild(0).gameObject;
-
-                }
-                else
-                {
-                    foodGO = foodSpawners[lastActiveFood + 1];
-                    foodChildGO = foodSpawners[0].transform.GetChild(0).gameObject;
-                }
-                foodGO.SetActive(true);
-                foodChildGO.SetActive(true);
-                //foodChildGO.GetComponent<BoxCollider>().enabled = true;
+                foodGO = foodSpawners[0];
+                foodChildGO = foodSpawners[0].transform.GetChild(0).gameObject;
             }
+            else
+            {
+                foodGO = foodSpawners[lastActiveFood + 1];
+                foodChildGO = foodSpawners[0].transform.GetChild(0).gameObject;
+            }
+            foodGO.SetActive(true);
+            foodChildGO.SetActive(true);
         }
+        #endregion
 
+        #region dog and chicken spawning
         // Chickens only from top
         void SpawnChicken()
         {
@@ -90,40 +100,6 @@ namespace Unit2
         }
 
         // Dogs only from left/ right
-        void SpawnRandomDog()
-        {
-            int randomSpawn = Random.Range(0, 3); // 0-2 = 3
-            switch (randomSpawn)
-            {
-                case 0:
-                    //SpawnRandomAnimalTop();
-                    break;
-                case 1:
-                    SpawnRandomAnimalLeft();
-                    break;
-                case 2:
-                    SpawnRandomDogRight();
-                    break;
-                default:
-                    break;
-            }
-        }
-        void SpawnRandomAnimalTop()
-        {
-            int animalIndex = Random.Range(0, animalPrefabs.Length); // 0-3
-            float spawnPosX = Random.Range(-spawnRangeX, spawnRangeX);
-            Vector3 animalSpawnLocation = new Vector3(spawnPosX, 0, spawnPosZ);
-
-            Instantiate(animalPrefabs[animalIndex], animalSpawnLocation, animalPrefabs[animalIndex].transform.rotation);
-        }
-        void SpawnRandomAnimalLeft()
-        {
-            SpawnRandomDog(true);
-        }
-        void SpawnRandomDogRight()
-        {
-            SpawnRandomDog(false);
-        }
         void SpawnRandomDog(bool isLeft)
         {
             int animalIndex = Random.Range(1, animalPrefabs.Length); // 0-3, 1 = chicken, not included
@@ -144,6 +120,33 @@ namespace Unit2
 
             Instantiate(animalPrefabs[animalIndex], animalSpawnLocation, Quaternion.Euler(rotation));
         }
+        void SpawnRandomAnimalLeft()
+        {
+            SpawnRandomDog(true);
+        }
+        void SpawnRandomDogRight()
+        {
+            SpawnRandomDog(false);
+        }
+        void SpawnRandomDog()
+        {
+            int randomSpawn = Random.Range(0, 3); // 0-2 = 3
+            switch (randomSpawn)
+            {
+                case 0:
+                    //SpawnRandomAnimalTop();
+                    break;
+                case 1:
+                    SpawnRandomAnimalLeft();
+                    break;
+                case 2:
+                    SpawnRandomDogRight();
+                    break;
+                default:
+                    break;
+            }
+        }
+        #endregion
 
         // Used by GameManager to increase difficulty based on score
         public void DifficultyIncrease()

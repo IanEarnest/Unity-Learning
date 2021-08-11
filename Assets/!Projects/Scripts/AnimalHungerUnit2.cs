@@ -7,6 +7,7 @@ namespace Unit2
 {
     public class AnimalHungerUnit2 :MonoBehaviour
     {
+        // Feed animal/ do something with fed animal and set hunger sliders
         public Slider hungerSlider;
         public int amountToBeFed;
         int currentFedAmount = 0;
@@ -15,22 +16,24 @@ namespace Unit2
 
         void Start()
         {
+            SetupHungerSlider();
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
+        }
+        void SetupHungerSlider()
+        {
+            // Set slider size to amountToBeFed value - higher amount = larger bar
             hungerSlider.maxValue = amountToBeFed;
             hungerSlider.value = hungerSlider.maxValue;
-            // Set slider size to amountToBeFed value - larger = larger
             Vector2 hungerSliderSizeDelta = hungerSlider.gameObject.GetComponent<RectTransform>().sizeDelta;
             float xSliderSize = hungerSliderSizeDelta.x+(amountToBeFed*xMultiplier);
             hungerSlider.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(xSliderSize, hungerSliderSizeDelta.y);
-            //hungerSlider.fillRect.gameObject.SetActive(false); //important?
-
-            gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
         }
+        // Adding animal to list, setting hunger slider
         public void FeedAnimal(int amount)
         {
             currentFedAmount += amount;
-            //hungerSlider.fillRect.gameObject.SetActive(true);
-            hungerSlider.value = (amountToBeFed - currentFedAmount);
-            if (currentFedAmount >= amountToBeFed)
+            hungerSlider.value = (amountToBeFed - currentFedAmount); // going downwards from high number
+            if (currentFedAmount >= amountToBeFed) // if animal fed
             {
                 if (gameObject.name.Contains(SpawnManagerUnit2.beagleName))
                 {

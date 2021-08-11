@@ -8,20 +8,16 @@ namespace Unit2
 {
     public class CameraShakeUnit2 :MonoBehaviour
     {
-        //Vector3 oPosition;
+        // Camera Shake - called from GameManager - bark
+        // rotates camera on z, two ways then stops, displays time on UI
+
         Quaternion oRotation;
-        //float rotateStartTime = 0.33f;
         float rotateZAngle = 1;
         public Text readyText;
 
         void Start()
         {
-            //oPosition = transform.position;
             oRotation = transform.rotation;
-        }
-
-        void Update()
-        {
         }
 
         public void CameraShaking(float duration)
@@ -71,14 +67,6 @@ namespace Unit2
             {
                 readyText.text = "";
             }
-        }
-
-        IEnumerator RotateAfterTime(float time, float rotation)
-        {
-            yield return new WaitForSeconds(time);
-            //transform.Rotate()
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, rotation);
-            //transform.rotation = oRotation;
         }
     }
 }

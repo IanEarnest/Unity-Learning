@@ -5,6 +5,14 @@ namespace Unit2
 {
     public class PlayerControllerUnit2 :MonoBehaviour
     {
+        // Player input keys, WASD, R, V
+        // moving player + restriction
+        // shooting
+        // uses GameManager
+        //R - Restart
+        //V - bark
+        //Q - spawn //debug
+        //C - lose life //debug
 
         public float speed = 20.0f;
         public float horizontalInput;// = -1..1;
@@ -16,34 +24,28 @@ namespace Unit2
         GameObject foodSpawn;
         int coolDown = 0;
         int coolDownMax = 50;
-        private GameManagerUnit2 gameManager;
-        private SpawnManagerUnit2 spawnManager;
+        GameManagerUnit2 gameManager;
 
-        private void Start()
+        // Setup gameobjects and scripts
+        void Start()
         {
-            foodSpawn = GameObject.Find("FoodSpawnPosition");
+            foodSpawn = GameObject.Find("FoodSpawnPosition"); // for player to shoot food
             gameManager = GameObject.Find("GameManager").GetComponent<GameManagerUnit2>();
-            spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManagerUnit2>();
         }
+        // Player input keys, WASD, R, V,
+        // moving player + restriction
+        // shooting
         void Update()
         {
-            //R - Restart
-            //V - bark
-            //Q - spawn
-            //C - lose life
-            PlayerDebugInput();
-
+            PlayerKeysInput(); // R - restart, V - bark
             PlayerInput(); // WASD
             PlayerMove(); // transform.translate (moving game object)
-            PlayerRestriction();
+            PlayerRestriction(); // restrict movement
             PlayerShoot(); // Space to shoot
-            foodSpawnPosition = foodSpawn.transform.position;
-            if (coolDown > 0)
-            {
-                coolDown--;
-            }
         }
-        void PlayerDebugInput()
+
+        // R - restart, V - bark
+        void PlayerKeysInput()
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
@@ -57,6 +59,7 @@ namespace Unit2
             //Debugs
             if (Input.GetKeyDown(KeyCode.Q))
             {
+                //spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManagerUnit2>();
                 //spawnManager.QuickSpawn();
             }
             if (Input.GetKeyDown(KeyCode.C))
@@ -64,22 +67,21 @@ namespace Unit2
                 //gameManager.LoseALife();
             }
         }
+        // Player input - horizontal/ vertical
         void PlayerInput()
         {
-            // Player input
             horizontalInput = Input.GetAxis("Horizontal");
             verticalInput = Input.GetAxis("Vertical");
         }
+        // Player movement
         void PlayerMove()
         {
-            // Player movement
-            //transform.Translate(horizontalInput * speed * Time.deltaTime, 0, verticalInput * speed * Time.deltaTime);//Vector3.right * speed * horizontalInput * Time.deltaTime);
             transform.Translate(Vector3.right * horizontalInput * speed * Time.deltaTime);
             transform.Translate(Vector3.forward * verticalInput * speed * Time.deltaTime);
         }
+        // Player restriction - keep the player in bounds
         void PlayerRestriction()
         {
-            // Player restriction - keep the player in bounds
             if (transform.position.x < -xRange)
             {
                 transform.position = new Vector3(-xRange, transform.position.y, transform.position.z);
@@ -97,6 +99,7 @@ namespace Unit2
                 transform.position = new Vector3(transform.position.x, transform.position.y, zRange);
             }
         }
+        // Shoot food from player
         void PlayerShoot()
         {
             // Player movement
@@ -104,20 +107,17 @@ namespace Unit2
             {
                 coolDown = coolDownMax;
                 GameObject newFood = Instantiate(food, foodSpawnPosition, food.transform.rotation);//transform.position, food.transform.rotation);
-                newFood.GetComponent<MoveForward>().speed = 40;
-                newFood.GetComponent<MoveForward>().enabled = true;
+                newFood.GetComponent<MoveForwardUnit2>().speed = 40;
+                newFood.GetComponent<MoveForwardUnit2>().enabled = true;
                 newFood.GetComponent<BoxCollider>().enabled = true;
                 newFood.SetActive(true);
                 Destroy(newFood, 5);
             }
+            foodSpawnPosition = foodSpawn.transform.position;
+            if (coolDown > 0)
+            {
+                coolDown--;
+            }
         }
-
-        //void OnCollisionEnter(Collision collision)
-        //{
-        //    if (collision.gameObject.CompareTag("Animal"))
-        //    {
-
-        //    }
-        //}
     }
 }

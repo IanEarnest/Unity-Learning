@@ -10,6 +10,13 @@ namespace Unit2
 
     public class GameManagerUnit2 :MonoBehaviour
     {
+        // using spawnManager, main camera
+
+        // check for game over
+        // update ui/ health slider
+        // barking - slow chickens, shake screen
+        // restart, add/ remove life, add score
+
         public GameObject mainCamera;
         public static int lives = 10;
         int maxLives = 10;
@@ -36,10 +43,17 @@ namespace Unit2
         public GameObject dogBoxSpawn;
         float scoreDifficultyIncrease = 30;
         SpawnManagerUnit2 spawnManager;
+        List<GameObject> dogsList = new List<GameObject>();
+        List<GameObject> chickens = new List<GameObject>();
+        public static void SetIsBarking(bool _isBarking)
+        {
+            isBarking = _isBarking;
+        }
+        public static bool isBarking = false;
+        float barkingDuration = 3;
 
         void Start()
         {
-            //lives = maxLives;
             healthSlider.maxValue = lives;
             Debug.Log($"Score: {score}");
             Debug.Log($"Lives: {lives}");
@@ -47,8 +61,82 @@ namespace Unit2
 
         void Update()
         {
-            GameOverCheck();
-            UIUpdate();
+            GameOverCheck(); // lives = 0, can restart, pause time
+            UIUpdate(); // player health slider, score, health, barking
+            CheckIncreaseDifficulty(); // based on score
+        }
+        #region update
+        public void GameOverCheck()
+        {
+            if (lives <= 0)
+            {
+                gameOver = true;
+                gameOverText.enabled = true;
+                restartButton.gameObject.SetActive(true);
+                Time.timeScale = 0;
+            }
+        }
+        public void UIUpdate()
+        {
+            //Healthslider - slider - background - image - color
+            healthSlider.value = (maxLives - lives); //lives-maxlives?
+            scoreText.text = scoreTextDefault + score;
+            healthText.text = $"{lives}/{maxLives}";
+            if (dogsList.Count > 0 && !isBarking)
+            {
+                barkText.enabled = true;
+            }
+            else
+            {
+                barkText.enabled = false;
+            }
+            HealthSliderUIUpdate();
+        }
+        // UI for heart graphic
+        void HealthSliderUIUpdate()
+        {
+            // Full HP
+            // Less than full HP
+            // Half HP
+            // Quarter HP
+            // Less than quarter HP
+
+            // Full HP
+            if (lives >= maxLives)
+            {
+                healthSlider.GetComponentInChildren<Image>().color = Color.green;
+                heartGOImage.sprite = heartFull;
+            }
+            // Less than full HP
+            else if (lives >= ((maxLives / 4) + (maxLives / 2)))
+            {
+                //print((maxLives / 4) + (maxLives / 2)); // 3 or 7 if 5 or 10 max
+                fillGOImage.color = Color.black; // set fill to red after first damage
+
+                healthSlider.GetComponentInChildren<Image>().color = Color.green;
+                heartGOImage.sprite = heart3of4;
+            }
+            // Half HP
+            else if (lives >= (maxLives / 2))
+            {
+                healthSlider.GetComponentInChildren<Image>().color = Color.yellow;
+                heartGOImage.sprite = heart2of4;
+            }
+            // Quarter HP
+            else if (lives >= (maxLives / 4))
+            {
+                healthSlider.GetComponentInChildren<Image>().color = Color.red;
+                heartGOImage.sprite = heart1of4;
+            }
+            // Less than quarter HP
+            else
+            {
+                healthSlider.GetComponentInChildren<Image>().color = Color.red;
+                heartGOImage.sprite = heartEmpty;
+            }
+        }
+        void CheckIncreaseDifficulty()
+        {
             if (score >= scoreDifficultyIncrease)
             {
                 spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManagerUnit2>();
@@ -56,88 +144,10 @@ namespace Unit2
                 scoreDifficultyIncrease += scoreDifficultyIncrease;
             }
         }
-        List<GameObject> dogsList = new List<GameObject>();
-        public void AddAnimal(string name)
-        {
-            float dogXIncrement = 0.8f;
-            Vector3 dogPos = new Vector3(dogBoxSpawn.transform.position.x-(dogXIncrement*dogsList.Count), dogBoxSpawn.transform.position.y, dogBoxSpawn.transform.position.z);
-            if (dogsList.Count < 6)
-            {
-                if (name.Contains(SpawnManagerUnit2.beagleName))
-                {
-                    AddDogToListAndGame(miniBeagle, dogPos);
-                }
-                else if (name.Contains(SpawnManagerUnit2.bulldogName))
-                {
-                    AddDogToListAndGame(miniBulldog, dogPos);
-                }
-            }
-            else
-            {
-                print("too many dogs");
-            }
-            if (name.Contains(SpawnManagerUnit2.chickenName))
-            {
-                Instantiate(miniChicken, chickenBoxSpawn.transform.position, miniChicken.transform.rotation);
-            }
-        }
-        public void AddDogToListAndGame(GameObject dog, Vector3 dogPos)
-        {
-            GameObject newDog = Instantiate(dog, dogPos, dog.transform.rotation);
-            dogsList.Add(newDog);
-        }
-        List<GameObject> chickens = new List<GameObject>();
-        void FindAllChickens()
-        {
-            //get chickens
-            GameObject[] animals = GameObject.FindGameObjectsWithTag("Animal");
-            foreach (GameObject chicken in animals)
-            {
-                if (chicken.name.Contains("Chicken"))
-                {
-                    chickens.Add(chicken);
-                }
-            }
-        }
-        void MakeChickensSlow(float barkingDuration)
-        {
-            InvokeRepeating("FindAndBarkChickens", 0, 0.5f);
-            StartCoroutine(WaitForSeconds(barkingDuration)); // cancel invokes/ end barking
-        }
-        void FindAndBarkChickens()
-        {
-            FindAllChickens();
-            foreach (GameObject chicken in chickens)
-            {
-                if (chicken != null)
-                {
-                    chicken.GetComponent<MoveForward>().Barked();
-                }
-            }
-        }
-        IEnumerator WaitForSeconds(float time)
-        {
-            //StartCoroutine(PrintWaitTime(time));
-            yield return new WaitForSeconds(time);
-            CancelInvoke("FindAndBarkChickens");
-            //SetIsBarking(false);
-        }
-        void DestroyDog()
-        {
-            GameObject dogToDelete = dogsList[dogsList.Count - 1].gameObject;
-            dogsList.RemoveAt(dogsList.Count - 1);
-            Destroy(dogToDelete);
-        }
-        void ShakeCamera(float barkingDuration)
-        {
-            mainCamera.GetComponent<CameraShakeUnit2>().CameraShaking(barkingDuration); // 3 seconds
-        }
-        public static void SetIsBarking(bool _isBarking)
-        {
-            isBarking = _isBarking;
-        }
-        public static bool isBarking = false;
-        float barkingDuration = 3;
+        #endregion
+
+        #region barking
+        // barking - slow chickens, shake screen
         public void Bark()
         {
             //check if dogs
@@ -156,18 +166,86 @@ namespace Unit2
                 //AddAnimal(SpawnManagerUnit2.beagleName); // testing
             }
         }
-
-        //gameOverText
-        public void GameOverCheck()
+        // Spawn dog/ chicken in areas
+        public void AddAnimal(string name)
         {
-            if (lives <= 0)
+            float dogXIncrement = 0.8f;
+            Vector3 dogPos = new Vector3(dogBoxSpawn.transform.position.x-(dogXIncrement*dogsList.Count), dogBoxSpawn.transform.position.y, dogBoxSpawn.transform.position.z);
+            // Spawn dog
+            if (dogsList.Count < 6)
             {
-                gameOver = true;
-                gameOverText.enabled = true;
-                restartButton.gameObject.SetActive(true);
-                Time.timeScale = 0;
+                if (name.Contains(SpawnManagerUnit2.beagleName))
+                {
+                    AddDogToListAndGame(miniBeagle, dogPos);
+                }
+                else if (name.Contains(SpawnManagerUnit2.bulldogName))
+                {
+                    AddDogToListAndGame(miniBulldog, dogPos);
+                }
+            }
+            else
+            {
+                print("too many dogs");
+            }
+            // Spawn mini-chicken
+            if (name.Contains(SpawnManagerUnit2.chickenName))
+            {
+                Instantiate(miniChicken, chickenBoxSpawn.transform.position, miniChicken.transform.rotation);
             }
         }
+        public void AddDogToListAndGame(GameObject dog, Vector3 dogPos)
+        {
+            GameObject newDog = Instantiate(dog, dogPos, dog.transform.rotation);
+            dogsList.Add(newDog);
+        }
+        void FindAllChickens()
+        {
+            //get chickens
+            GameObject[] animals = GameObject.FindGameObjectsWithTag("Animal");
+            foreach (GameObject chicken in animals)
+            {
+                if (chicken.name.Contains("Chicken"))
+                {
+                    chickens.Add(chicken);
+                }
+            }
+        }
+        // Repeat find chickens and apply bark effects every 0.5 seconds
+        void MakeChickensSlow(float barkingDuration)
+        {
+            InvokeRepeating("FindAndBarkChickens", 0, 0.5f);
+            StartCoroutine(WaitForSeconds(barkingDuration)); // cancel invokes/ end barking
+        }
+        void FindAndBarkChickens()
+        {
+            FindAllChickens();
+            foreach (GameObject chicken in chickens)
+            {
+                if (chicken != null)
+                {
+                    chicken.GetComponent<MoveForwardUnit2>().Barked();
+                }
+            }
+        }
+        // Wait and cancel repeat invoke
+        IEnumerator WaitForSeconds(float time)
+        {
+            yield return new WaitForSeconds(time);
+            CancelInvoke("FindAndBarkChickens");
+        }
+        void DestroyDog()
+        {
+            GameObject dogToDelete = dogsList[dogsList.Count - 1].gameObject;
+            dogsList.RemoveAt(dogsList.Count - 1);
+            Destroy(dogToDelete);
+        }
+        void ShakeCamera(float barkingDuration)
+        {
+            mainCamera.GetComponent<CameraShakeUnit2>().CameraShaking(barkingDuration); // 3 seconds
+        }
+        #endregion
+
+
         public void Restart()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -179,57 +257,6 @@ namespace Unit2
             Time.timeScale = 1;
             print("Restarted");
         }
-        void HealthSliderUIUpdate()
-        {
-            if (lives >= maxLives)
-            {
-                healthSlider.GetComponentInChildren<Image>().color = Color.green;
-                heartGOImage.sprite = heartFull;
-            }
-            else if (lives >= ((maxLives / 4) + (maxLives / 2)))
-            {
-                //print((maxLives / 4) + (maxLives / 2)); // 3 or 7 if 5 or 10 max
-                fillGOImage.color = Color.black; // set fill to red after first damage
-
-                healthSlider.GetComponentInChildren<Image>().color = Color.green;
-                heartGOImage.sprite = heart3of4;
-            }
-            else if (lives >= (maxLives / 2))
-            {
-                healthSlider.GetComponentInChildren<Image>().color = Color.yellow;
-                heartGOImage.sprite = heart2of4;
-            }
-            else if (lives >= (maxLives / 4))
-            {
-                healthSlider.GetComponentInChildren<Image>().color = Color.red;
-                heartGOImage.sprite = heart1of4;
-            }
-            else
-            {
-                healthSlider.GetComponentInChildren<Image>().color = Color.red;
-                heartGOImage.sprite = heartEmpty;
-            }
-        }
-        public void UIUpdate()
-        {
-            //Healthslider
-            //slider
-            //Background
-            //    image
-            //        color
-            healthSlider.value = (maxLives - lives); //lives-maxlives?
-            scoreText.text = scoreTextDefault + score;
-            healthText.text = $"{lives}/{maxLives}";
-            if (dogsList.Count > 0 && !isBarking)
-            {
-                barkText.enabled = true;
-            }
-            else
-            {
-                barkText.enabled = false;
-            }
-            HealthSliderUIUpdate();
-        }
         public void AddLives(int value)
         {
             lives += value;
@@ -240,7 +267,6 @@ namespace Unit2
             score += value;
             //Debug.Log($"Score added - Score: {score}");
         }
-
         public void LoseALife()
         {
             if (lives > 0)
