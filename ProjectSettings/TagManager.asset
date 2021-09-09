@@ -11,6 +11,8 @@ TagManager:
   - Projectile
   - Food
   - FoodSpawner
+  - Wave
+  - Rocket
   layers:
   - Default
   - TransparentFX
