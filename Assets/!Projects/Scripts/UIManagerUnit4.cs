@@ -10,9 +10,11 @@ namespace Unit4
     {
 
         public TextMeshProUGUI powerUpText;
-        public TextMeshProUGUI WaveText;
+        public TextMeshProUGUI waveText;
+        public TextMeshProUGUI powerUpsCountText;
         string powerUpTextPre = "Power Up: ";
         string waveTextPre = "Wave: ";
+        string powerUpsCountTextPre = "Power Ups count: "; //2 = 1, 0, 1
         WaveUnit4 _waveUnit4;
         PowerUpsUnit4 _powerUpsUnit4;
         PlayerControllerUnit4 _playerControllerUnit4;
@@ -40,7 +42,8 @@ namespace Unit4
             //print($"Power up {powerUp} {Enum.GetName(typeof(powerupType), powerUp)}, {(powerupType)powerUp}"); //powerupType enum?
             //public int activePowerup = 0;
 
-            WaveText.text = $"{waveTextPre} {_waveUnit4.waveNumber}";
+            waveText.text = $"{waveTextPre} {_waveUnit4.waveNumber}";
+            powerUpsCountText.text = $"{powerUpsCountTextPre} {_powerUpsUnit4.powerUpCountTotal} = {_powerUpsUnit4.powerUpCountSmash}, {_powerUpsUnit4.powerUpCountRockets}, {_powerUpsUnit4.powerUpCountPush}";
         }
     }
 }

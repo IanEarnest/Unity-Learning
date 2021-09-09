@@ -16,6 +16,10 @@ namespace Unit4
         RocketUnit4 _RocketUnit4;
         Coroutine _coroutine;
         List<Coroutine> _coroutines = new List<Coroutine>();
+        [NonSerialized] public int powerUpCountSmash = 0;
+        [NonSerialized] public int powerUpCountRockets = 0;
+        [NonSerialized] public int powerUpCountPush = 0;
+        [NonSerialized] public int powerUpCountTotal = 0;
 
 
         //Smash     = Lightning = Balloon   = 1
@@ -124,16 +128,36 @@ namespace Unit4
                 Destroy(go);
             }
         }
-        public void ActivatePowerUp(int powerUp, Collider other = null)
+        public void ActivatePowerUp(int powerUp, bool OverridePowerUp = false, Collider other = null)
         {
             // destroy pickup
             if (other != null)
             {
                 Destroy(other.gameObject);
             }
-            //existing powerup
+            //existing powerup - add to count vs replace existing
+            if (OverridePowerUp)
+            {
+                ReplacePowerUp(powerUp);
+                SetPlayerActivePowerUp(powerUp);
+                return;
+            }
+            if (_PlayerControllerUnit4.hasPowerup)
+            {
+                CountPowerUps(1, powerUp); // add 1 of power up to count
+            }
+            else
+            {
+
+                //ReplacePowerUp(powerUp);
+                SetPlayerActivePowerUp(powerUp);
+            }
+
+        }
+        public void ReplacePowerUp(int powerUp)
+        {
             PowerUpDisable();
-            if (_coroutine != null)
+            if (_coroutine != null) // stop countdowns
             {
                 StopCoroutine(_coroutine); //StopCoroutine(PowerupCountdownRoutine()); //[StopAllCoroutines][1]()
             }
@@ -144,6 +168,14 @@ namespace Unit4
                     StopCoroutine(co);
                 }
                 _coroutines.Clear();
+            }
+        }
+        void SetPlayerActivePowerUp(int powerUp)
+        {
+            if (powerUp == (int)powerupType.smash)
+            {
+                //reset player jump ability
+                _PlayerControllerUnit4.allowJump = true;
             }
             //print($"Power up {powerUp} {Enum.GetName(typeof(powerupType), powerUp)}, {(powerupType)powerUp}"); //powerupType enum?
             _PlayerControllerUnit4.activePowerup = powerUp;
@@ -179,9 +211,41 @@ namespace Unit4
         }
         public void PowerUpDisable()
         {
+            //CountPowerUps(-1); // reduce count by 1 of active powerup
             _PlayerControllerUnit4.hasPowerup = false;
             _PlayerControllerUnit4.powerupIndicator.SetActive(false);
             _PlayerControllerUnit4.activePowerup = (int)powerupType.none;
+        }
+        public void CountPowerUps(int AddOrMinus = 1, int pickedUp = 0)
+        {
+            if (_PlayerControllerUnit4.activePowerup == (int)powerupType.smash && powerUpCountSmash >= 0 ||
+                pickedUp == (int)powerupType.smash && powerUpCountSmash >= 0)
+            {
+                powerUpCountSmash += AddOrMinus;
+            }
+            if (_PlayerControllerUnit4.activePowerup == (int)powerupType.rockets && powerUpCountRockets >= 0 ||
+                pickedUp == (int)powerupType.rockets && powerUpCountRockets >= 0)
+            {
+                powerUpCountRockets += AddOrMinus;
+            }
+            if (_PlayerControllerUnit4.activePowerup == (int)powerupType.push && powerUpCountPush >= 0 ||
+                pickedUp == (int)powerupType.push && powerUpCountPush >= 0)
+            {
+                powerUpCountPush += AddOrMinus;
+            }
+            if (powerUpCountSmash < 0)
+            {
+                powerUpCountSmash = 0;
+            }
+            if (powerUpCountRockets < 0)
+            {
+                powerUpCountRockets = 0;
+            }
+            if (powerUpCountPush < 0)
+            {
+                powerUpCountPush = 0;
+            }
+            powerUpCountTotal = powerUpCountSmash + powerUpCountRockets + powerUpCountPush;
         }
     }
 }

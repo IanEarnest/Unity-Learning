@@ -64,18 +64,40 @@ namespace Unit4
         }
         void CheatKeys()
         {
+            if (Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                //_PowerUpsUnit4.powerUpCountSmash += 1;
+                //adds multiple??
+                _PowerUpsUnit4.CountPowerUps(1, (int)PowerUpsUnit4.powerupType.smash);
+                _PowerUpsUnit4.CountPowerUps(1, (int)PowerUpsUnit4.powerupType.rockets);
+                _PowerUpsUnit4.CountPowerUps(1, (int)PowerUpsUnit4.powerupType.push);
+            }
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _PowerUpsUnit4.ActivatePowerUp(1);
+                if (_PowerUpsUnit4.powerUpCountSmash > 0)
+                {
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.smash, true);
+                    _PowerUpsUnit4.CountPowerUps(-1, (int)PowerUpsUnit4.powerupType.smash);
+                }
             }
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                _PowerUpsUnit4.ActivatePowerUp(2);
+                if (_PowerUpsUnit4.powerUpCountRockets > 0)
+                {
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.rockets, true);
+                    _PowerUpsUnit4.CountPowerUps(-1, (int)PowerUpsUnit4.powerupType.rockets);
+                    //_PowerUpsUnit4.powerUpCountRockets--;
+                }
             }
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                _PowerUpsUnit4.ActivatePowerUp(3);
+                if (_PowerUpsUnit4.powerUpCountPush > 0)
+                {
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.push, true);
+                    _PowerUpsUnit4.CountPowerUps(-1, (int)PowerUpsUnit4.powerupType.push);
+                }
             }
+
             if (Input.GetKeyDown(KeyCode.Alpha4))
             {
                 _SpawnManagerUnit4.SpawnTest();// boss test
@@ -106,15 +128,15 @@ namespace Unit4
             {
                 if (other.name.Contains("1"))
                 {
-                    _PowerUpsUnit4.ActivatePowerUp(1, other);
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.smash, false, other);
                 }
                 else if (other.name.Contains("2"))
                 {
-                    _PowerUpsUnit4.ActivatePowerUp(2, other);
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.rockets, false, other);
                 }
                 else if (other.name.Contains("3"))
                 {
-                    _PowerUpsUnit4.ActivatePowerUp(3, other);
+                    _PowerUpsUnit4.ActivatePowerUp((int)PowerUpsUnit4.powerupType.push, false, other);
                 }
             }
             else if (other.CompareTag("Rocket")) // hit by enemy rocket
